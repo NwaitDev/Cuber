@@ -1,4 +1,7 @@
+#include <GL/freeglut_std.h>
+#include <bits/atomic_wide_counter.h>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <stdlib.h>
 #include <stdio.h>
@@ -43,6 +46,9 @@ static float rotationX = 1;
 static float rotationY = 1;
 static float rotationZ = 1;
 
+static int frameNumber = 0;
+static int totalFrameNumber;
+
 /*used for delta-time in anim*/
 static int old_t;
 
@@ -62,6 +68,10 @@ static const float bleu[] = { 0.0F,0.0F,1.0F,1.0F };
 static std::vector<float> XBlinkyCoords;
 static std::vector<float> YBlinkyCoords;
 static std::vector<float> ZBlinkyCoords;
+static std::vector<float> RBlinkyColor;
+static std::vector<float> GBlinkyColor;
+static std::vector<float> BBlinkyColor;
+static std::vector<int> blinkiesPerFrame;
 
 
 /* Fonction d'initialisation des parametres     */
@@ -92,17 +102,35 @@ static void init(void) {
   old_t = glutGet(GLUT_ELAPSED_TIME);
 
   std::string line;
+
+  //ignoring the first line (these are just the headers of the columns)
+  std::getline(file, line);
+
+  float x,y,z,r,g,b;
+
+  int t = 0;
+  int t_minus_1 = 0;
+  int countedBlinkies = 0;
+
   while (std::getline(file, line)) {
       std::istringstream iss(line);
 
-      float value;
-      iss >> value;
-      XBlinkyCoords.push_back(value);
-      iss >> value;
-      YBlinkyCoords.push_back(value);
-      iss >> value;
-      ZBlinkyCoords.push_back(value);
+      iss >> x >> y >> z >> r >> g >> b >>t;
+      XBlinkyCoords.push_back(x);
+      YBlinkyCoords.push_back(y);
+      ZBlinkyCoords.push_back(z);
+      RBlinkyColor.push_back(r);
+      GBlinkyColor.push_back(g);
+      BBlinkyColor.push_back(b);
+      countedBlinkies++;
+
+      if ( t > t_minus_1 ){
+        blinkiesPerFrame.push_back(countedBlinkies);
+        countedBlinkies = 0;
+        t_minus_1 = t;
+      }
   }
+  blinkiesPerFrame.push_back(countedBlinkies);
   file.close();
 }
 
@@ -115,7 +143,7 @@ static void scene(void) {
 
 	glPushMatrix();
     glScalef(.2,.2,.2);
-    structure(XBlinkyCoords,YBlinkyCoords, ZBlinkyCoords);
+    structure(XBlinkyCoords, YBlinkyCoords, ZBlinkyCoords, RBlinkyColor, GBlinkyColor, BBlinkyColor, blinkiesPerFrame, frameNumber);
 	glPopMatrix();
 }
 
@@ -203,7 +231,6 @@ static void keyboard(unsigned char key,int x,int y) {
       zoom -= 0.5F;
       glutPostRedisplay();
       break;
-
   }
 }
 
@@ -227,6 +254,22 @@ static void special(int specialKey,int x,int y) {
       break;
     case GLUT_KEY_F2:
       light(1);
+      glutPostRedisplay();
+      break;
+    
+    case GLUT_KEY_RIGHT:
+      frameNumber+=1;
+      if(frameNumber>=blinkiesPerFrame.size()){
+        frameNumber=blinkiesPerFrame.size()-1;
+      }
+      glutPostRedisplay();
+      break;
+
+    case GLUT_KEY_LEFT:
+      frameNumber-=1;
+      if(frameNumber<0){
+        frameNumber=0;
+      }
       glutPostRedisplay();
       break;
   }

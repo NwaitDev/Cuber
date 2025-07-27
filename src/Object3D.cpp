@@ -39,7 +39,7 @@ float compute_angle( Dir3D vector1, Dir3D vector2) {
 }
 
 void funcToTest(){
-    std::cout<<"Hello World ! \n";
+    std::cout<<"Hello World !\n";
 }
 
 //************************************************************************************
@@ -47,10 +47,33 @@ void funcToTest(){
 //************************************************************************************
 
 
-Object3D::Object3D(void (*_3DImageFunction)(), float* color) : color(color),_3DImageFunction(_3DImageFunction){}
+Object3D::Object3D(void (*_3DImageFunction)(), float* color) : 
+r(*color),
+g(*(color+1)),
+b(*(color+2)),
+alpha(*(color+3)),
+_3DImageFunction(_3DImageFunction)
+{
+    color[0] = r;
+    color[1] = g;
+    color[2] = b;
+    color[3] = alpha;
+}
 
-Object3D::Object3D(void (*_3DImageFunction)()) : color(vert), _3DImageFunction(_3DImageFunction) {}
+Object3D::Object3D(void (*_3DImageFunction)()) : Object3D(_3DImageFunction, gris) {}
 
+Object3D::Object3D(void (*_3DImageFunction)(), float r, float g, float b) :  
+r(r),
+g(g),
+b(b),
+alpha(0.5F),
+_3DImageFunction(_3DImageFunction)
+{
+    color[0] = r;
+    color[1] = g;
+    color[2] = b;
+    color[3] = alpha;
+}
 
 void Object3D::getCurrentMatrix(){
     glGetFloatv(GL_MODELVIEW_MATRIX, this->currentMatrix); // retrieve the current modelview matrix and save it to currentMatrix
@@ -69,7 +92,10 @@ void Object3D::display(){
 //*****************************************************
 //____________Wrapping the images in objects___________
 //*****************************************************
-
 Object3D makeBlinky(){
     return Object3D(blinkyImage);
+}
+
+Object3D makeBlinky(float r, float g, float b){
+    return Object3D(blinkyImage, r, g, b);
 }

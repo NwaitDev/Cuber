@@ -13,8 +13,9 @@
 
 class Object3D {
 public:
-	Object3D(void (*_3DImageFunction)(),float* color);
+	Object3D(void (*_3DImageFunction)(), float* color);
 	Object3D(void (*_3DImageFunction)());
+	Object3D(void (*_3DImageFunction)(), float r, float g, float b);
 	void getCurrentMatrix();
 	void setCurrentMatrix();
 
@@ -22,12 +23,13 @@ public:
 
 private:
 	
-	float *color; //float color[4];
+	float r,g,b,alpha;
+	float color[4];
 	void (*_3DImageFunction)();
 	GLfloat currentMatrix[16];
 };
 
-Object3D makeBlinky();
+Object3D makeBlinky(float r, float g, float b);
 
 
 #endif
