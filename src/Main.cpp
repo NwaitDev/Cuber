@@ -2,6 +2,7 @@
 #include <bits/atomic_wide_counter.h>
 #include <fstream>
 #include <iostream>
+#include <ostream>
 #include <sstream>
 #include <stdlib.h>
 #include <stdio.h>
@@ -122,13 +123,13 @@ static void init(void) {
       RBlinkyColor.push_back(r);
       GBlinkyColor.push_back(g);
       BBlinkyColor.push_back(b);
-      countedBlinkies++;
 
       if ( t > t_minus_1 ){
         blinkiesPerFrame.push_back(countedBlinkies);
         countedBlinkies = 0;
         t_minus_1 = t;
       }
+      countedBlinkies++;
   }
   blinkiesPerFrame.push_back(countedBlinkies);
   file.close();
